@@ -1,0 +1,119 @@
+#!/bin/bash
+
+function install_bundler()
+{
+  log info "Installing bundler"
+
+  sudo gem install bundler
+
+  return
+}
+
+function install_docker_template_bundler()
+{
+  log info "Installing docker-template with Bundler"
+
+  log info "Copying Gemfile [${DIR}/Gemfile -> ${PWD}]"
+  cp ${DIR}/Gemfile ./
+
+  if ! $(bundler exec docker-template list) ; then
+    bundler install --path=vendor/bundler
+  fi
+
+  return
+}
+
+function install_docker_template_gem()
+{
+  log info "Installing docker-template with Gem"
+
+  sudo gem install docker-template
+
+  return
+}
+
+function write_gitignore_line()
+{
+  gitignore_file=$1
+  shift
+  ignore_pattern=$@
+
+  if [ ! -f "$gitignore_file" ]; then
+    touch $gitignore_file
+  fi
+
+  if [    -z "$(grep -x "${ignore_pattern}" ${gitignore_file})" \
+       -a -z "$(grep -x "#${ignore_pattern}" ${gitignore_file})" \
+       -a -z "$(grep -x "# ${ignore_pattern}" ${gitignore_file})" ]; then
+    echo "$gitignore_file -> $ignore_pattern"
+    echo "$ignore_pattern" >> "$gitignore_file"
+  fi
+
+  return
+}
+
+function set_gitignore()
+{
+  for p in "# docker-template / docker-template-wrapper files" \
+            "Gemfile" \
+            "Gemfile.lock" \
+            ".bundle/" \
+            "vendor/" \
+            "**/cache/"; do
+    write_gitignore_line "${PWD}/.gitignore" $p
+  done
+
+  return
+}
+
+function setup()
+{
+  log info "Executing from ${PWD}"
+
+  if ! gem --version &> /dev/null ; then
+    log error "Ruby or Gem not found. Please install Ruby 2.1+ before proceeding."
+    exit $E_MISSING_DEPENDENCY
+  fi
+
+  if ! bundler &> /dev/null ; then
+    install_bundler
+  fi
+
+  if [ ! "$DOCKER_TEMPLATE" == "gem" ]; then
+    install_docker_template_bundler
+  else
+    install_docker_template_gem
+  fi
+
+  set_gitignore
+
+  return
+}
+
+
+################################################################################
+####   main
+################################################################################
+
+DIR=$(dirname $(readlink -f $0))
+
+# includes ./env.sh that resolve environment variables and add default functions
+. ${DIR}/env.sh
+
+for arg in $@; do
+  case $arg in
+    --gem | -g)
+      DOCKER_TEMPLATE="gem"
+      shift
+      ;;
+
+    --* | -*)
+      # Any remaining / not parsed option (arg starting with '--' | '-') is consider invalid
+      exit_invalid_option $arg
+      ;;
+  esac
+done
+
+# set working dir PROJECT_PATH (resolved by ./env.sh) to setup
+cd $PROJECT_PATH
+setup "$@"
