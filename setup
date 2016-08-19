@@ -1,5 +1,21 @@
 #!/bin/bash
 
+
+function usage()
+{
+  echo \
+"Usage: $0 [OPTIONS]
+
+  Install the requested version of 'docker-template' in your system
+
+Options:
+    -g | --gem                                  Uses GEM instead of Bundler to install 'docker-template'
+"
+# Prints default usage options, from ./env.sh
+  usage_general_options
+}
+
+
 function install_bundler()
 {
   log info "Installing bundler"
@@ -11,14 +27,12 @@ function install_bundler()
 
 function install_docker_template_bundler()
 {
-  log info "Installing docker-template with Bundler"
+  log info "Installation of 'docker-template' with Bundler"
 
   log info "Copying Gemfile [${DIR}/Gemfile -> ${PWD}]"
   cp ${DIR}/Gemfile ./
 
-  if ! $(bundler exec docker-template list) ; then
-    bundler install --path=vendor/bundler
-  fi
+  bundler show docker-template || { bundler install --path=vendor/bundler; log info "'docker-template' installed with Bundler"; }
 
   return
 }
@@ -70,14 +84,9 @@ function setup()
 {
   log info "Executing from ${PWD}"
 
-  if ! gem --version &> /dev/null ; then
-    log error "Ruby or Gem not found. Please install Ruby 2.1+ before proceeding."
-    exit $E_MISSING_DEPENDENCY
-  fi
+  command_exists gem || { log error "Ruby or Gem not found. Please install Ruby 2.1+ before proceeding." ; exit $E_MISSING_DEPENDENCY; }
 
-  if ! bundler &> /dev/null ; then
-    install_bundler
-  fi
+  command_exists bundler || install_bundler
 
   if [ ! "$DOCKER_TEMPLATE" == "gem" ]; then
     install_docker_template_bundler
@@ -107,13 +116,13 @@ for arg in $@; do
       shift
       ;;
 
-    --* | -*)
+    -*)
       # Any remaining / not parsed option (arg starting with '--' | '-') is consider invalid
-      exit_invalid_option $arg
+      exit_invalid_option "$arg"
       ;;
   esac
 done
 
 # set working dir PROJECT_PATH (resolved by ./env.sh) to setup
-cd $PROJECT_PATH
+cd "$PROJECT_PATH"
 setup "$@"

@@ -66,6 +66,12 @@ function log_debug()
   fi
 }
 
+
+function command_exists()
+{
+  command -v "$@" > /dev/null 2>&1
+}
+
 # Exits application with bad usage message for invalid param value.
 # It is meant to be used when a valueable option is given, but the value is invalid or missing (blank)
 #
@@ -102,7 +108,8 @@ function exit_invalid_option()
 function usage_general_options()
 {
   echo \
-"    -h | --help                                 Shows this help page
+"General Options:
+    -h | --help                                 Shows this help page
     -v | --verbose                              Prints DEBUG level output
     -q | --quiet                                Prints nothing
     [-p | --project-path]=DOCKER_PROJECT_PATH   Docker-template project root folder.

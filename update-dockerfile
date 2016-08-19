@@ -14,9 +14,7 @@ function usage()
 
 Params:
   REPOSITORIES    List of repositories to update.
-                  If no repositories are given, it updates all available repositories.
-
-Options:"
+                  If no repositories are given, it updates all available repositories."
 
   # Prints default usage options, from ./env.sh
   usage_general_options
@@ -213,12 +211,16 @@ DIR=$(dirname $(readlink -f $0))
 # includes ./env.sh that resolve environment variables and add default functions
 . ${DIR}/env.sh
 
-if $(which docker-template) ; then
+if command_exists docker-template ; then
   DOCKER_TEMPLATE='docker-template'
-else
+elif bundler show docker-template ; then
   DOCKER_TEMPLATE='bundler exec docker-template'
+else
+  log error "Command 'docker-template' not found. Please setup your system first. See README for instructions."
+  exit $E_MISSING_DEPENDENCY
 fi
-log info "docker-template through ${DOCKER_TEMPLATE}"
+
+log info "docker-template running through '${DOCKER_TEMPLATE}'"
 
 REPOSITORIES=
 declare -A REPO_TAGS
@@ -226,7 +228,7 @@ declare -A TAG_ALIASES
 
 for arg in $@; do
   case $arg in
-    --* | -*)
+    -*)
       # Any remaining / not parsed option (arg starting with '--' | '-') is consider invalid
       exit_invalid_option $arg
       ;;
@@ -235,4 +237,10 @@ done
 
 # set working dir PROJECT_PATH (resolved by ./env.sh) to run update
 cd $PROJECT_PATH
+
+if [ ! -f "${PROJECT_PATH}/opts.yml" ]; then
+  log error "Docker-template project not found in \"project path\": ${PROJECT_PATH}"
+  exit $E_REPO_NOTFOUND
+fi
+
 update_repositories "$@"
