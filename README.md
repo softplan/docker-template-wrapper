@@ -14,7 +14,6 @@ All the given examples use **shell script** to update the `Dockerfile`. Most of 
 
 This project aims to bridge these two cases: have complex template-based docker images (with `docker-template`) and keep the `Dockerfiles` (like **docker library** images). To do so, we use a shell script (`update-dockerfile`) that uses `docker-template` outputs to update images. It do it through `docker-template cache` and `docker-template list`. Moreover, it also to generate and update project files.
 
-
 ## Setup
 
 Docker-template requires Ruby 2.1+. So, firstly you need Ruby 2.1+ up and running in your system.
@@ -128,6 +127,27 @@ The script supports update all images or a list of given ones.
 ```
 
 Always use `update-dockerfile --help` for full usage.
+
+
+## Running with Docker
+
+For easy of use, a docker image is provided to run the application out-of-the-box.
+
+Simply run:
+
+```shell
+docker run -it -v $PWD:/project rflbianco/docker-template-wrapper
+```
+
+Any option accepted by `update-dockerfile` can be passed as argument to your `docker run`:
+
+```shell
+docker run -it -v $PWD:/project rflbianco/docker-template-wrapper --project-url="https://github.com/namespace/repository" --verbose tomcat oracle-java
+```
+
+### Environment variables
+
+- `PROJECT_URL`: sets the project repository URL (eg. GitHub) to create the "Supported versions" in the `README` file. Default: `https://github.com/<your_namespace>/<your_repository>`
 
 
 [docker-template]: https://github.com/envygeeks/docker-template
