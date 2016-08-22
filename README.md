@@ -145,6 +145,14 @@ Any option accepted by `update-dockerfile` can be passed as argument to your `do
 docker run --rm -it -v -e LOCAL_UID=$(id -u $USER) $PWD:/project rflbianco/docker-template-wrapper --project-url="https://github.com/namespace/repository" --verbose tomcat oracle-java
 ```
 
+### Volumes
+
+To execute the `update-dockerfile` script in a project sitting in your system, a default volume is expected.
+
+- `PROJECT_HOME` points to `/project`.
+
+Mapping your host's path to your project to this volume will be automatically recognized when the container runs.
+
 ### Environment variables
 
 - `PROJECT_URL`: sets the project repository URL (eg. GitHub) to create the "Supported versions" in the `README` file. Same as passing `--project-url` as `CMD`.
