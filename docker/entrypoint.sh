@@ -1,15 +1,9 @@
 #!/bin/sh
 
-project_url_set=0
+USER_ID=${LOCAL_UID:-9001}
 
-for arg in "$0"; do
-  if [ $(echo "$arg" | grep -e "\-\-project_url=") ]; then
-    project_url_set=1
-  fi
-done
+echo "Starting with UID : $USER_ID"
+## adduser differs from default GNU conterpart
+adduser -D -s /bin/bash -u $USER_ID -g "" wrapperuser
 
-if [ ! $project_url_set -a -n "$PROJECT_URL" ]; then
-  project_url_arg="--project-url=${PROJECT_URL}"
-fi
-
-${DOCKER_TEMPLATE_WRAPPER_HOME}/update-dockerfile  "$@"
+su-exec wrapperuser ${DOCKER_TEMPLATE_WRAPPER_HOME}/update-dockerfile  "$@"

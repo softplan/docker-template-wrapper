@@ -136,19 +136,27 @@ For easy of use, a docker image is provided to run the application out-of-the-bo
 Simply run:
 
 ```shell
-docker run -it -v $PWD:/project rflbianco/docker-template-wrapper
+docker run --rm -it -e LOCAL_UID=$(id -u $USER) -v $PWD:/project rflbianco/docker-template-wrapper
 ```
 
 Any option accepted by `update-dockerfile` can be passed as argument to your `docker run`:
 
 ```shell
-docker run -it -v $PWD:/project rflbianco/docker-template-wrapper --project-url="https://github.com/namespace/repository" --verbose tomcat oracle-java
+docker run --rm -it -v -e LOCAL_UID=$(id -u $USER) $PWD:/project rflbianco/docker-template-wrapper --project-url="https://github.com/namespace/repository" --verbose tomcat oracle-java
 ```
 
 ### Environment variables
 
-- `PROJECT_URL`: sets the project repository URL (eg. GitHub) to create the "Supported versions" in the `README` file. Default: `https://github.com/<your_namespace>/<your_repository>`
+- `PROJECT_URL`: sets the project repository URL (eg. GitHub) to create the "Supported versions" in the `README` file. Same as passing `--project-url` as `CMD`.
+- `LOCAL_UID`: sets the UID running inside the container. Required to keep permission in your `PROJECT_HOME` volume synced with host. If not passed, is likely you will need to run `chown` in your project directory after executing this container.
 
+```shell
+docker run --rm -it \
+      -e LOCAL_UID=$(id -u $USER) \
+      -e PROJECT_URL="https://github.com/namespace/repository" \
+      -v $PWD:/project \
+      rflbianco/docker-template-wrapper
+```
 
 [docker-template]: https://github.com/envygeeks/docker-template
 [docker-template-wiki]: https://github.com/envygeeks/docker-template/wiki
