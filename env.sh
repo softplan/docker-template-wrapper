@@ -72,6 +72,15 @@ function command_exists()
   command -v "$@" > /dev/null 2>&1
 }
 
+function directory_is_empty()
+{
+  if [ -z "$(ls -A $1)" ]; then
+    return 0
+  fi
+
+  return 1
+}
+
 # Exits application with bad usage message for invalid param value.
 # It is meant to be used when a valueable option is given, but the value is invalid or missing (blank)
 #

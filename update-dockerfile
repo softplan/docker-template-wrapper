@@ -192,6 +192,10 @@ update_repositories() {
       mkdir -p "$repo_tag_target_dir"
       mv "${repo_cache_dir}/${tag}/Dockerfile" "$repo_tag_target_dir"
       ln -sr "${repo_target_dir}/README.md" "$repo_tag_target_dir"
+
+      if ! directory_is_empty "${repo_cache_dir}/${tag}/copy"; then
+        mv "${repo_cache_dir}/${tag}/copy" "$repo_tag_target_dir"
+      fi
     done
 
     # clean cache files
