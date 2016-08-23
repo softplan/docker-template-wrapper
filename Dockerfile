@@ -13,7 +13,7 @@ RUN    apk add --no-cache su-exec bash coreutils git alpine-sdk make \
     && apk del --purge git alpine-sdk make \
     && rm -rf /var/cache/apk/*
 
-VOLUME $PROJECT_HOME
+VOLUME [ $PROJECT_HOME ]
 WORKDIR $PROJECT_HOME
 ENTRYPOINT [ "/docker-template-wrapper/entrypoint.sh" ]
 CMD [ "--verbose" ]
