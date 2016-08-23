@@ -106,7 +106,7 @@ function load_repositories() {
   IFS_BAK=$IFS
   IFS='
 '
-  for line in $(docker-template list 2> /dev/null | bundler exec docker-template list); do
+  for line in $(docker-template list 2> /dev/null || bundler exec docker-template list); do
     clean_line=$(cleanup_output $line)
     log debug "line... ${line} => ${clean_line}"
 
@@ -178,7 +178,7 @@ update_repositories() {
     done
 
     # Cache the updated Dockerfiles
-    docker-template cache $repository --no-clean 2> /dev/null | bundler exec docker-template cache $repository --no-clean
+    docker-template cache $repository --no-clean 2> /dev/null || bundler exec docker-template cache $repository --no-clean
 
     # Generate and caches README
     readme=$(create_readme "$repository" "$repo_cache_readme_file")
