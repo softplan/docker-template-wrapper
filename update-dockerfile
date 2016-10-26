@@ -98,7 +98,8 @@ function create_readme()
 #   - TAG_ALIASES: associative array with a list of aliases for each
 #                  [repository-tag].
 #                eg. TAG_ALIASES[tomcat-8-jdk8] => "8 latest 8.0.36-jdk8"
-function load_repositories() {
+function load_repositories()
+{
   REPOSITORIES=
   REPO_TAGS=
   TAG_ALIASES=
@@ -141,7 +142,8 @@ function load_repositories() {
 #
 # Params:
 #     $@ = [REPOSITORIES]: array of repositories to update.
-update_repositories() {
+update_repositories()
+{
   requested_repositories=$*
   effective_repositories=
 
