@@ -186,8 +186,13 @@ update_repositories()
     create_readme "$repository" "$repo_cache_readme_file"
 
     # Remove old files and copy new ones
-    rm -rf "$repo_target_dir"
-    mkdir "$repo_target_dir"
+    # It only removes non-hidden files. This is on purpose, to avoid removing
+    # CI definition files.
+    rm -rf "${repo_target_dir:?}"/*
+
+    # Create target folder if not exists
+    ls "$repo_target_dir" &> /dev/null || mkdir "$repo_target_dir"
+
     cp "$repo_cache_readme_file" "$repo_target_dir"
     for tag in $tags; do
       repo_tag_target_dir="${repo_target_dir}/${tag}"
