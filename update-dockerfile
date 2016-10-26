@@ -44,20 +44,20 @@ function get_line_value()
 
 # Cache README.md inserting links to Dockerfile for each tag/alias
 #
-# Creates the README file into [repository_cache_readme_file].
+# Creates the README file into [repo_cache_readme_file].
 #
 # template file, that MUST be located inside
 # 'repos/[REPOSITORY]' template dir, and insert "Supported tags"
 # on its TOP
 #
 # Params:
-#     - $1 = [repository]                  : repository name
-#     - $2 = [repository_cache_readme_file]: path to cache README file
+#     - $1 = [repository]            : repository name
+#     - $2 = [repo_cache_readme_file]: path to cache README file
 function create_readme()
 {
   repository=$1
-  repository_cache_readme_file=$2
-  repository_template_dir="repos/${repository}"
+  repo_cache_readme_file=$2
+  repo_template_dir="repos/${repository}"
 
   if [[ -z "$repository" ]]; then
     log error "Function [create_readme], required param [repository] not given."
@@ -83,7 +83,7 @@ function create_readme()
     echo "- [${versions} (*${tag}/Dockerfile*)](${PROJECT_URL}/blob/master/${repository}/${tag}/Dockerfile)" >> "$repo_cache_readme_file"
   done
   echo "" >> "$repo_cache_readme_file"
-  cat "${repository_template_dir}/README.md" >> "$repo_cache_readme_file"
+  cat "${repo_template_dir}/README.md" >> "$repo_cache_readme_file"
 }
 
 # Load all available Repositories data into global variables for
@@ -98,7 +98,8 @@ function create_readme()
 #   - TAG_ALIASES: associative array with a list of aliases for each
 #                  [repository-tag].
 #                eg. TAG_ALIASES[tomcat-8-jdk8] => "8 latest 8.0.36-jdk8"
-function load_repositories() {
+function load_repositories()
+{
   REPOSITORIES=
   REPO_TAGS=
   TAG_ALIASES=
@@ -141,8 +142,9 @@ function load_repositories() {
 #
 # Params:
 #     $@ = [REPOSITORIES]: array of repositories to update.
-update_repositories() {
-  requested_repositories=$@
+update_repositories()
+{
+  requested_repositories=$*
   effective_repositories=
 
   log info "Executing from ${PWD}"
@@ -181,11 +183,16 @@ update_repositories() {
     docker-template cache $repository --no-clean 2> /dev/null || bundler exec docker-template cache $repository --no-clean
 
     # Generate and caches README
-    readme=$(create_readme "$repository" "$repo_cache_readme_file")
+    create_readme "$repository" "$repo_cache_readme_file"
 
     # Remove old files and copy new ones
-    rm -rf "$repo_target_dir"
-    mkdir "$repo_target_dir"
+    # It only removes non-hidden files. This is on purpose, to avoid removing
+    # CI definition files.
+    rm -rf "${repo_target_dir:?}"/*
+
+    # Create target folder if not exists
+    ls "$repo_target_dir" &> /dev/null || mkdir "$repo_target_dir"
+
     cp "$repo_cache_readme_file" "$repo_target_dir"
     for tag in $tags; do
       repo_tag_target_dir="${repo_target_dir}/${tag}"
@@ -210,27 +217,16 @@ update_repositories() {
 ####   main
 ################################################################################
 
-DIR=$(dirname $(readlink -f $0))
+DIR=$(dirname "$(readlink -f "$0")")
 
 # includes ./env.sh that resolve environment variables and add default functions
 . ${DIR}/env.sh
-
-if command_exists docker-template ; then
-  DOCKER_TEMPLATE='docker-template'
-elif bundler show docker-template ; then
-  DOCKER_TEMPLATE='bundler exec docker-template'
-else
-  log error "Command 'docker-template' not found. Please setup your system first. See README for instructions."
-  exit $E_MISSING_DEPENDENCY
-fi
-
-log info "docker-template running through '${DOCKER_TEMPLATE}'"
 
 REPOSITORIES=
 declare -A REPO_TAGS
 declare -A TAG_ALIASES
 
-for arg in $@; do
+for arg in "$@"; do
   case $arg in
     -*)
       # Any remaining / not parsed option (arg starting with '--' | '-') is consider invalid
@@ -246,5 +242,16 @@ if [ ! -f "${PROJECT_PATH}/opts.yml" ]; then
   log error "Docker-template project not found in \"project path\": ${PROJECT_PATH}"
   exit $E_REPO_NOTFOUND
 fi
+
+if command_exists docker-template ; then
+  DOCKER_TEMPLATE='docker-template'
+elif bundler show docker-template ; then
+  DOCKER_TEMPLATE='bundler exec docker-template'
+else
+  log error "Command 'docker-template' not found. Please setup your system first. See README for instructions."
+  exit $E_MISSING_DEPENDENCY
+fi
+
+log info "docker-template running through '${DOCKER_TEMPLATE}'"
 
 update_repositories "$@"

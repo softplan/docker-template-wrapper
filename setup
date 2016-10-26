@@ -11,7 +11,7 @@ function usage()
 Options:
     -g | --gem                                  Uses GEM instead of Bundler to install 'docker-template'
 "
-# Prints default usage options, from ./env.sh
+  # Prints default usage options, from ./env.sh
   usage_general_options
 }
 
@@ -46,11 +46,18 @@ function install_docker_template_gem()
   return
 }
 
+# Appends a pattern to a given .gitignore file.
+#
+# If the pattern already exists, it does nothing. Commented lines are also
+# recognized.
+#
+# Params:
+#     $1 = [gitignore_file]: .gitignore_file to be append to
+#     #2 = [ignore_pattern]: pattern to be appended
 function write_gitignore_line()
 {
-  gitignore_file=$1
-  shift
-  ignore_pattern=$@
+  gitignore_file="$1"
+  ignore_pattern="$2"
 
   if [ ! -f "$gitignore_file" ]; then
     touch $gitignore_file
@@ -59,7 +66,7 @@ function write_gitignore_line()
   if [    -z "$(grep -x "${ignore_pattern}" ${gitignore_file})" \
        -a -z "$(grep -x "#${ignore_pattern}" ${gitignore_file})" \
        -a -z "$(grep -x "# ${ignore_pattern}" ${gitignore_file})" ]; then
-    echo "$gitignore_file -> $ignore_pattern"
+    log info "$gitignore_file -> $ignore_pattern"
     echo "$ignore_pattern" >> "$gitignore_file"
   fi
 
@@ -104,12 +111,12 @@ function setup()
 ####   main
 ################################################################################
 
-DIR=$(dirname $(readlink -f $0))
+DIR=$(dirname "$(readlink -f "$0")")
 
 # includes ./env.sh that resolve environment variables and add default functions
 . ${DIR}/env.sh
 
-for arg in $@; do
+for arg in "$@"; do
   case $arg in
     --gem | -g)
       DOCKER_TEMPLATE="gem"

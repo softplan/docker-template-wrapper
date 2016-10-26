@@ -1,16 +1,16 @@
 #!/bin/bash
 
 # Error exit codes
-E_BAD_USAGE=1
-E_MISSING_PARAM=2
-E_REPO_NOTFOUND=3
-E_MISSING_DEPENDENCY=4
+export E_BAD_USAGE=1
+export E_MISSING_PARAM=2
+export E_REPO_NOTFOUND=3
+export E_MISSING_DEPENDENCY=4
 
 # Log level enum
-LOG_NONE=-1
-LOG_ERROR=0
-LOG_INFO=1
-LOG_DEBUG=2
+export LOG_NONE=-1
+export LOG_ERROR=0
+export LOG_INFO=1
+export LOG_DEBUG=2
 
 
 # Log into STDOUT or STDERR accorddingly with $1 [msg_log_level] and LOG_LEVEL
@@ -24,10 +24,10 @@ LOG_DEBUG=2
 function log()
 {
   case $1 in
-    error) shift; log_error $@;;
-    info) shift; log_info $@;;
-    debug) shift; log_debug $@;;
-    *) log_info $@;;
+    error) shift; log_error "$@";;
+    info) shift; log_info "$@";;
+    debug) shift; log_debug "$@";;
+    *) log_info "$@";;
   esac
 }
 
@@ -39,7 +39,7 @@ function log()
 function log_error()
 {
   if [[ $LOG_LEVEL -ge $LOG_ERROR ]]; then
-    (>&2 echo -e "ERROR... " $@)
+    (>&2 echo -e "ERROR... " "$@")
   fi
 }
 
@@ -51,7 +51,7 @@ function log_error()
 function log_info()
 {
   if [[ $LOG_LEVEL -ge $LOG_INFO ]]; then
-    echo -e $@
+    echo -e "$@"
   fi
 }
 
@@ -62,7 +62,7 @@ function log_info()
 function log_debug()
 {
   if [[ $LOG_LEVEL -ge $LOG_DEBUG ]]; then
-    echo -e $@
+    echo -e "$@"
   fi
 }
 
@@ -145,7 +145,7 @@ function arg_value()
 # set default logging level to INFO
 LOG_LEVEL=${LOG_LEVEL:-$LOG_INFO}
 
-for arg in $@; do
+for arg in "$@"; do
   case $arg in
     --help | help | -h)
       usage
