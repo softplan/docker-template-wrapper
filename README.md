@@ -136,13 +136,13 @@ For easy of use, a docker image is provided to run the application out-of-the-bo
 Simply run:
 
 ```shell
-docker run --rm -it -e LOCAL_UID=$(id -u $USER) -v $PWD:/project rflbianco/docker-template-wrapper
+docker run --rm -it -e LOCAL_UID=$(id -u $USER) -v $PWD:/project softplan/docker-template-wrapper
 ```
 
 Any option accepted by `update-dockerfile` can be passed as argument to your `docker run`:
 
 ```shell
-docker run --rm -it -v -e LOCAL_UID=$(id -u $USER) $PWD:/project rflbianco/docker-template-wrapper --project-url="https://github.com/namespace/repository" --verbose tomcat oracle-java
+docker run --rm -it -v -e LOCAL_UID=$(id -u $USER) $PWD:/project softplan/docker-template-wrapper --project-url="https://github.com/namespace/repository" --verbose tomcat oracle-java
 ```
 
 ### Volumes
@@ -155,15 +155,15 @@ Mapping your host's path to your project to this volume will be automatically re
 
 ### Environment variables
 
-- `PROJECT_URL`: sets the project repository URL (eg. GitHub) to create the "Supported versions" in the `README` file. Same as passing `--project-url` as `CMD`.
-- `LOCAL_UID`: sets the UID running inside the container. Required to keep permission in your `PROJECT_HOME` volume synced with host. If not passed, is likely you will need to run `chown` in your project directory after executing this container.
+- `PROJECT_URL`: sets the project repository URL (eg. GitHub) to create the "Supported versions" in the `README` file. Same as passing `--project-url` in `CMD`.
+- `LOCAL_UID`: sets the UID running inside the container. Required to keep permission in your `PROJECT_HOME` volume synced with host. If not passed, it is likely that you will need to run `chown` in your project directory after executing this container.
 
 ```shell
 docker run --rm -it \
       -e LOCAL_UID=$(id -u $USER) \
       -e PROJECT_URL="https://github.com/namespace/repository" \
       -v $PWD:/project \
-      rflbianco/docker-template-wrapper
+      softplan/docker-template-wrapper
 ```
 
 [docker-template]: https://github.com/envygeeks/docker-template
