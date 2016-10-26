@@ -50,7 +50,7 @@ function write_gitignore_line()
 {
   gitignore_file=$1
   shift
-  ignore_pattern=$@
+  ignore_pattern="$*"
 
   if [ ! -f "$gitignore_file" ]; then
     touch $gitignore_file
@@ -104,12 +104,12 @@ function setup()
 ####   main
 ################################################################################
 
-DIR=$(dirname $(readlink -f $0))
+DIR=$(dirname "$(readlink -f "$0")")
 
 # includes ./env.sh that resolve environment variables and add default functions
 . ${DIR}/env.sh
 
-for arg in $@; do
+for arg in "$@"; do
   case $arg in
     --gem | -g)
       DOCKER_TEMPLATE="gem"
