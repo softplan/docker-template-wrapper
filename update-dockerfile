@@ -222,17 +222,6 @@ DIR=$(dirname "$(readlink -f "$0")")
 # includes ./env.sh that resolve environment variables and add default functions
 . ${DIR}/env.sh
 
-if command_exists docker-template ; then
-  DOCKER_TEMPLATE='docker-template'
-elif bundler show docker-template ; then
-  DOCKER_TEMPLATE='bundler exec docker-template'
-else
-  log error "Command 'docker-template' not found. Please setup your system first. See README for instructions."
-  exit $E_MISSING_DEPENDENCY
-fi
-
-log info "docker-template running through '${DOCKER_TEMPLATE}'"
-
 REPOSITORIES=
 declare -A REPO_TAGS
 declare -A TAG_ALIASES
@@ -253,5 +242,16 @@ if [ ! -f "${PROJECT_PATH}/opts.yml" ]; then
   log error "Docker-template project not found in \"project path\": ${PROJECT_PATH}"
   exit $E_REPO_NOTFOUND
 fi
+
+if command_exists docker-template ; then
+  DOCKER_TEMPLATE='docker-template'
+elif bundler show docker-template ; then
+  DOCKER_TEMPLATE='bundler exec docker-template'
+else
+  log error "Command 'docker-template' not found. Please setup your system first. See README for instructions."
+  exit $E_MISSING_DEPENDENCY
+fi
+
+log info "docker-template running through '${DOCKER_TEMPLATE}'"
 
 update_repositories "$@"
